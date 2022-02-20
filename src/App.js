@@ -5,7 +5,7 @@ import {ShopPage} from "./pages/shop/Shop";
 import './App.css';
 import {Header} from "./components/header/header";
 import {SignInUp} from "./pages/sign-in-up/SignInUp";
-import {auth} from './firebase/firebase.utils'
+import {auth, createUserProfileDocument} from './firebase/firebase.utils'
 
 
 export class App extends React.Component {
@@ -17,9 +17,24 @@ export class App extends React.Component {
   }
 
   componentDidMount() {
-    this.unsubscribeFromAuth = auth.onAuthStateChanged(user => {
-      this.setState({currentUser: user});
-      console.log(user);
+    this.unsubscribeFromAuth = auth.onAuthStateChanged(async userAuth => {
+      // this.setState({currentUser: user});
+      if(userAuth) {
+        const userRef = createUserProfileDocument(userAuth);
+        (await userRef).onSnapshot( snapshot => {
+          this.setState({
+            currentUser: {
+              id: snapshot.id,
+              ...snapshot.data()
+            }
+          }, () => {
+            console.log('STATE: ', this.state);
+          })
+        })
+      } else {
+        this.setState({currentUser: userAuth});
+      }
+
     })
   }
 
@@ -35,6 +50,7 @@ export class App extends React.Component {
           <Route exact path='/' element={<Homepage/>} />
           <Route path='/shop' element={<ShopPage/>} />
           <Route path='/signIn' element={<SignInUp/>} />
+          {/*<Route path='/questions' element={<Questions/>} />*/}
         </Routes>
       </div>
     );
