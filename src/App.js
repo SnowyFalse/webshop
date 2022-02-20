@@ -27,8 +27,6 @@ export class App extends React.Component {
               id: snapshot.id,
               ...snapshot.data()
             }
-          }, () => {
-            console.log('STATE: ', this.state);
           })
         })
       } else {
